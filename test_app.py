@@ -3,8 +3,8 @@ from app import SimpleHandler
 
 class TestDevOpsApp(unittest.TestCase):
     def test_handler_exists(self):
-        """Verify our web handler is defined and ready."""
-        self.assertTrue(hasattr(SimpleHandler, "do_GET"))
+        # This will FAIL because 'broken_function' does not exist in our app!
+        self.assertTrue(hasattr(SimpleHandler, "broken_function"))
 
 if __name__ == '__main__':
     unittest.main()
