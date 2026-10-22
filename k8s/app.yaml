@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-deployment
+  labels:
+    app: web-service
+spec:
+  # We want exactly 2 identical copies of our container running at all times
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-service
+  template:
+    metadata:
+      labels:
+        app: web-service
+    spec:
+      containers:
+      - name: web-container
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-service
+spec:
+  type: ClusterIP
+  selector:
+    app: web-service
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
