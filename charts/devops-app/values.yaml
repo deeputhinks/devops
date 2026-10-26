@@ -1,0 +1,15 @@
+replicaCount: 3
+
+image:
+  repository: ghcr.io/deeputhinks/devops
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5000
+  targetPort: 5000
+
+env:
+  APP_ENV: "helm-production"
+  PORT: "5000"
