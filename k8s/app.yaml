@@ -5,8 +5,7 @@ metadata:
   labels:
     app: web-service
 spec:
-  # We want exactly 2 identical copies of our container running at all times
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: web-service
@@ -17,9 +16,16 @@ spec:
     spec:
       containers:
       - name: web-container
-        image: nginx:alpine
+        image: my-devops-app:1.0
+        imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 80
+        - containerPort: 5000
+        # Inject all keys from ConfigMap and Secret as environment variables!
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
 ---
 apiVersion: v1
 kind: Service
@@ -31,5 +37,5 @@ spec:
     app: web-service
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 80
+    port: 5000
+    targetPort: 5000
