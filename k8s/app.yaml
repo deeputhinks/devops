@@ -16,11 +16,10 @@ spec:
     spec:
       containers:
       - name: web-container
-        image: my-devops-app:1.0
-        imagePullPolicy: IfNotPresent
+        image: ghcr.io/deeputhinks/devops:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
-        # Inject all keys from ConfigMap and Secret as environment variables!
         envFrom:
         - configMapRef:
             name: app-config
