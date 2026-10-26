@@ -1,31 +1,57 @@
 name: DevOps Automated Pipeline
-# Trigger this pipeline on every git push to the main branch
+
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+
+# Grant permission to push packages to GitHub Container Registry (GHCR)
+permissions:
+  contents: read
+  packages: write
+
 jobs:
-  test-and-build:
+  test-and-publish:
     runs-on: ubuntu-latest
+
     steps:
-      # Step 1: Download our code onto GitHub's runner machine
+      # Step 1: Download repository code
       - name: Checkout Code
         uses: actions/checkout@v4
-      # Step 2: Set up Python runtime
+
+      # Step 2: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      # Step 3: Run our automated unit tests (Continuous Integration)
+
+      # Step 3: Run Unit Tests (The Quality Gate)
       - name: Run Unit Tests
         run: |
           echo "Running unit tests..."
           python -m unittest test_app.py
-      # Step 4: Build the Docker Image (Continuous Delivery packaging)
-      - name: Build Docker Image
-        run: |
-          echo "Building Docker Image..."
-          docker build -t my-devops-app:${{ github.sha }} .
+
+      # Step 4: Log in to GitHub Container Registry (GHCR)
+      # Only run when pushing to main (skip on pull requests)
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 5: Build and Push Docker Image to GHCR
+      - name: Build and Push Docker Image
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+
       - name: Pipeline Success
-        run: echo " CI/CD Pipeline Passed Successfully!"
+        run: echo "🎉 Image successfully built and published to GHCR!"
